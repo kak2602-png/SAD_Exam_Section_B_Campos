@@ -10,11 +10,27 @@ import {
 /**
  * Optional hardcoded defaults (leave empty to configure via the UI modal & localStorage).
  */
-const DEFAULT_SUPABASE_URL = '';
-const DEFAULT_SUPABASE_ANON_KEY = '';
+const DEFAULT_SUPABASE_URL = 'https://iitnsjlbtkxtwueqpanf.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpdG5zamxidGt4dHd1ZXFwYW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ5NTQ5NzAsImV4cCI6MjExMDUzMDk3MH0.Iw3ryoqlHRNZXrS6iS8e1EmGrXSuKS-_1F6Pyseecew';
 
 const STORAGE_URL_KEY = 'sg_supabase_url';
 const STORAGE_KEY_KEY = 'sg_supabase_anon_key';
+
+(function hydrateConfigFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search || window.location.hash.replace(/^#/, ''));
+    const urlParam = params.get('sb_url');
+    const keyParam = params.get('sb_key');
+    if (urlParam && keyParam) {
+      localStorage.setItem(STORAGE_URL_KEY, urlParam.trim());
+      localStorage.setItem(STORAGE_KEY_KEY, keyParam.trim());
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  } catch {
+    // Ignore malformed URL parameters
+  }
+})();
 
 const QUICK_FILL_ACCOUNTS = [
   { label: 'Dr. Elena Navarro', sublabel: 'Administration', email: 'staff@exam.edu', tag: 'staff', badge: 'Staff', tone: 'indigo' },

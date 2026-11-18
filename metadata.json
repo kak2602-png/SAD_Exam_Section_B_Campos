@@ -1,0 +1,6 @@
+{
+  "name": "ScholarGuard — Student Scholarship Monitoring & Academic Compliance",
+  "description": "Production-ready Student Scholarship Monitoring and Academic Compliance System with PostgreSQL RLS, dynamic Asia/Manila policy evaluation, verification gates, and audit history.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

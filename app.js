@@ -43,8 +43,8 @@ const QUICK_FILL_ACCOUNTS = [
 ];
 
 const state = {
-  supabaseUrl: DEFAULT_SUPABASE_URL || localStorage.getItem(STORAGE_URL_KEY) || '',
-  supabaseAnonKey: DEFAULT_SUPABASE_ANON_KEY || localStorage.getItem(STORAGE_KEY_KEY) || '',
+  supabaseUrl: localStorage.getItem(STORAGE_URL_KEY) || DEFAULT_SUPABASE_URL || '',
+  supabaseAnonKey: localStorage.getItem(STORAGE_KEY_KEY) || DEFAULT_SUPABASE_ANON_KEY || '',
   client: null,
   showConfigModal: false,
   loading: false,
@@ -162,6 +162,14 @@ function initSupabaseClient() {
   }
 }
 
+function formatConnectionError(err, fallbackMsg) {
+  const msg = err?.message || fallbackMsg || 'Request failed.';
+  if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('networkerror')) {
+    return `Unable to reach Supabase (${state.supabaseUrl}). Check if your Supabase project is paused in the Supabase Dashboard (free projects pause after 7 days of inactivity) or update your URL & Anon Key in Supabase Config.`;
+  }
+  return msg;
+}
+
 async function bootstrapSession() {
   if (!state.client) {
     render();
@@ -180,7 +188,7 @@ async function bootstrapSession() {
       await loadUserContextAndData();
     }
   } catch (err) {
-    addToast('error', err.message || 'Failed to initialize session.');
+    addToast('error', formatConnectionError(err, 'Failed to initialize session.'));
   } finally {
     state.loading = false;
     render();
@@ -327,7 +335,7 @@ async function handleSaveConfig(url, anonKey) {
     addToast('error', 'Both Supabase Project URL and Anon Key are required.');
     return;
   }
-  state.supabaseUrl = url.trim();
+  state.supabaseUrl = url.trim().replace(/\/+$/, '');
   state.supabaseAnonKey = anonKey.trim();
   localStorage.setItem(STORAGE_URL_KEY, state.supabaseUrl);
   localStorage.setItem(STORAGE_KEY_KEY, state.supabaseAnonKey);
@@ -362,7 +370,7 @@ async function handleSignIn(email, password) {
     await loadUserContextAndData();
     addToast('success', `Signed in as ${state.profile.full_name}.`);
   } catch (err) {
-    state.authError = err.message || 'Sign-in failed.';
+    state.authError = formatConnectionError(err, 'Sign-in failed.');
   } finally {
     state.busyAction = false;
     render();
@@ -411,7 +419,7 @@ async function handleRegister({ fullName, email, password, role, studentId }) {
       state.authMode = 'login';
     }
   } catch (err) {
-    state.authError = err.message || 'Registration failed.';
+    state.authError = formatConnectionError(err, 'Registration failed.');
   } finally {
     state.busyAction = false;
     render();
